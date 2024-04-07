@@ -2,7 +2,7 @@
 % Please edit documentation in R/Used_fn.R
 \name{unique_grobject_metacol}
 \alias{unique_grobject_metacol}
-\title{Make unique entry gr object with metacolumns}
+\title{Create unique entry gr object with metacolumns}
 \usage{
 unique_grobject_metacol(genomic_coord, metacolumn_name)
 }
@@ -15,7 +15,7 @@ unique_grobject_metacol(genomic_coord, metacolumn_name)
 Gr object with unique entries
 }
 \description{
-Make unique entry gr object with metacolumns
+Create unique entry gr object with metacolumns
 }
 \examples{
 unique_grobject_metacol(genomic_coord = c("chr2:15000-15500","chr5:10001-10122"), metacolumn_name = "Peak_id")
