@@ -4,7 +4,7 @@
 \alias{maplot}
 \title{MA Plot labelled with significant genes}
 \usage{
-maplot(res, thresh = 0.05, labelsig = TRUE, textcx = 1, ...)
+maplot(res, thresh = 0.05, labelsig = FALSE, textcx = 1, ...)
 }
 \arguments{
 \item{res}{DESeq2 result table of differential analysis}
