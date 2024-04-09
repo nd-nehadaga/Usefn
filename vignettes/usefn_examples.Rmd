@@ -73,14 +73,14 @@ pca.correlogram(count_matrix = count_matrix,ntop = 1000,metadata = meta_df,covs 
 
 ```
 
-```{r,warning=FALSE, message = FALSE,error=FALSE, fig.height= 3,fig.width= 3, dpi = 200}
+```{r,warning=FALSE, message = FALSE,error=FALSE, fig.height= 3,fig.width= 5, dpi = 200}
 #### Hetmap of count data based clustering of top variable features
 draw_heatmap_top_peaks(data_mat = count_matrix,ntop = 1000,col_select = c("Tissue","Batch"),meta_df = meta_df,rownorm = FALSE)
 
 
 ```
 
-```{r,warning=FALSE, message = FALSE,error=FALSE,fig.height= 3,fig.width= 3, dpi = 200}
+```{r,warning=FALSE, message = FALSE,error=FALSE,fig.height= 3,fig.width= 5, dpi = 200}
 
 ### Result table of differential gene expression analysis from DESeq2, refer DESCRIPTION to know more about the data
 data(res_df)
