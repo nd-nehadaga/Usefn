@@ -1,6 +1,6 @@
 Package: Usefn
 Title: Common functions 
-Version: 0.0.0.9000
+Version: 1.0.0
 Authors@R: 
     person("Neha", "Daga", , "nd.nehadaga@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
@@ -15,4 +15,10 @@ Imports:
     pheatmap
 Depends: 
     DESeq2,
-    matrixStats
+    matrixStats,
+    R (>= 2.10)
+LazyData: true
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

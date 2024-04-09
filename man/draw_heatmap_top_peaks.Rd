@@ -4,7 +4,7 @@
 \alias{draw_heatmap_top_peaks}
 \title{Clustered heatmap based on variable features}
 \usage{
-draw_heatmap_top_peaks(data_mat, ntop, col_select, meta_df, outfn, rownorm)
+draw_heatmap_top_peaks(data_mat, ntop, col_select, meta_df, rownorm)
 }
 \arguments{
 \item{data_mat}{Count matrix (rld or vst transformed, normalised)}
@@ -14,8 +14,6 @@ draw_heatmap_top_peaks(data_mat, ntop, col_select, meta_df, outfn, rownorm)
 \item{col_select}{Vector of annotation column names}
 
 \item{meta_df}{Row annotation data frame}
-
-\item{outfn}{Output filename}
 
 \item{rownorm}{Z-score across rows. Logical value TRUE/FALSE}
 }

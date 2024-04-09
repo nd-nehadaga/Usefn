@@ -4,7 +4,7 @@
 \alias{modify_string}
 \title{Split string based on separator}
 \usage{
-modify_string(x, delimtter, position)
+modify_string(x, delimtter, position, fixed = TRUE)
 }
 \arguments{
 \item{x}{Input string}
@@ -12,6 +12,8 @@ modify_string(x, delimtter, position)
 \item{delimtter}{Splitting separator}
 
 \item{position}{Position of output string after splitting}
+
+\item{fixed}{Logical value TRUE or FALSE. If TRUE match split exactly otherwise use regular expression. Default is TRUE}
 }
 \value{
 Split string

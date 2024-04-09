@@ -4,10 +4,12 @@
 \alias{to_add_gene_symbol_ENSEMBL}
 \title{Mapping ENSEMBL to gene symbols}
 \usage{
-to_add_gene_symbol_ENSEMBL(input_ensembl_vector)
+to_add_gene_symbol_ENSEMBL(input_ensembl_vector, ensembl_biomart)
 }
 \arguments{
 \item{input_ensembl_vector}{Vector of ensembl ids to be mapped}
+
+\item{ensembl_biomart}{biomart database to be used. Refer to biomart bioconductor package}
 }
 \value{
 Data frame with gene symbols, entrezid

@@ -11,7 +11,6 @@ pca.correlogram(
   covs,
   scale,
   pcCount,
-  outdir,
   logTransform = TRUE
 )
 }
@@ -27,8 +26,6 @@ pca.correlogram(
 \item{scale}{logical value TRUE or FALSE}
 
 \item{pcCount}{Number of dimension}
-
-\item{outdir}{Output file name for correlogram}
 
 \item{logTransform}{Deafault is TRUE}
 }

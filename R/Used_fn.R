@@ -141,6 +141,7 @@ to_get_overlap_bw_gr_from_peakids = function (input_genomic_coord1,input_genomic
 #' @param x Input string
 #' @param delimtter Splitting separator
 #' @param position Position of output string after splitting
+#' @param fixed Logical value TRUE or FALSE. If TRUE match split exactly otherwise use regular expression. Default is TRUE
 #'
 #' @return Split string
 #' @export
@@ -148,10 +149,10 @@ to_get_overlap_bw_gr_from_peakids = function (input_genomic_coord1,input_genomic
 #' @examples
 
 
-modify_string = function (x,delimtter,position) {
+modify_string = function (x,delimtter,position,fixed = TRUE) {
 
 
-  output_string = unlist(strsplit(as.character(x),split = delimtter))[position]
+  output_string = unlist(strsplit(as.character(x),split = delimtter,fixed = fixed))[position]
 
   return (output_string)
 
@@ -206,7 +207,7 @@ to_get_bed_df_peaks_from_peak_id_vector = function(input_peak_id_vector,bed_file
 
 compute_pca <- function(data_mat, ntop,meta_df){
 
-  Pvars <- rowVars(data_mat)
+  Pvars <- rowVars(data_mat,na.rm = TRUE,useNames = TRUE)
   select <- order(Pvars, decreasing = TRUE)[seq_len(min(ntop,
                                                         length(Pvars)))]
 
@@ -236,7 +237,6 @@ compute_pca <- function(data_mat, ntop,meta_df){
 #' @param covs Column names of covariates
 #' @param scale logical value TRUE or FALSE
 #' @param pcCount Number of dimension
-#' @param outdir Output file name for correlogram
 #' @param logTransform Deafault is TRUE
 #'
 #' @return Heatmap of correlogram between PCA loadings and covariates
@@ -244,10 +244,10 @@ compute_pca <- function(data_mat, ntop,meta_df){
 #'
 #' @examples
 
-pca.correlogram <- function(count_matrix,ntop, metadata, covs, scale, pcCount, outdir, logTransform = TRUE){
+pca.correlogram <- function(count_matrix,ntop, metadata, covs, scale, pcCount, logTransform = TRUE){
 
 
-  Pvars <- rowVars(count_matrix)
+  Pvars <- rowVars(count_matrix,na.rm = TRUE,useNames = TRUE)
   select <- order(Pvars, decreasing = TRUE)[seq_len(min(ntop,
                                                         length(Pvars)))]
 
@@ -300,12 +300,10 @@ pca.correlogram <- function(count_matrix,ntop, metadata, covs, scale, pcCount, o
     }
   }
 
-  pdf(outdir, height=10, width=10)
 
   grid::grid.draw(r2CvPlot$gtable)
-  densPlot()
+  densPlot_out = densPlot()
 
-  dev.off()
 
 }
 
@@ -316,7 +314,6 @@ pca.correlogram <- function(count_matrix,ntop, metadata, covs, scale, pcCount, o
 #' @param ntop Top n variable features
 #' @param col_select Vector of annotation column names
 #' @param meta_df Row annotation data frame
-#' @param outfn Output filename
 #' @param rownorm Z-score across rows. Logical value TRUE/FALSE
 #'
 #' @return Heatmap based on n variable features
@@ -324,9 +321,9 @@ pca.correlogram <- function(count_matrix,ntop, metadata, covs, scale, pcCount, o
 #'
 #' @examples
 
-draw_heatmap_top_peaks = function (data_mat,ntop,col_select,meta_df,outfn,rownorm) {
+draw_heatmap_top_peaks = function (data_mat,ntop,col_select,meta_df,rownorm) {
 
-  Pvars <- rowVars(data_mat)
+  Pvars <- rowVars(data_mat,na.rm = TRUE,useNames = TRUE)
   select <- order(Pvars, decreasing = TRUE)[seq_len(min(ntop,
                                                         length(Pvars)))]
 
@@ -372,17 +369,7 @@ draw_heatmap_top_peaks = function (data_mat,ntop,col_select,meta_df,outfn,rownor
   if (check1 & check2) {
 
     p1 = pheatmap::pheatmap(input_mat,annotation_col = annotate_col_df,cluster_rows = T,cluster_cols = T,show_rownames = F,annotation_row = annotate_row_df)
-    p2 = pheatmap::pheatmap(input_mat,annotation_col = annotate_col_df,cluster_rows = F,cluster_cols = F,show_rownames = F,annotation_row = annotate_row_df)
 
-    pdf(file = outfn,width = 10,height = 10,onefile = TRUE,useDingbats = FALSE)
-
-    grid::grid.newpage()
-    grid::grid.draw(p1$gtable)
-
-    grid::grid.newpage()
-    grid::grid.draw(p2$gtable)
-
-    dev.off()
 
   }
 
@@ -462,6 +449,7 @@ volcanoplot <- function (res, lfcthresh=2, sigthresh=0.05, main="Volcano Plot", 
 #' Mapping ENSEMBL to gene symbols
 #'
 #' @param input_ensembl_vector Vector of ensembl ids to be mapped
+#' @param ensembl_biomart biomart database to be used. Refer to biomart bioconductor package
 #'
 #' @return Data frame with gene symbols, entrezid
 #'
@@ -469,11 +457,11 @@ volcanoplot <- function (res, lfcthresh=2, sigthresh=0.05, main="Volcano Plot", 
 #'
 #' @examples
 
-to_add_gene_symbol_ENSEMBL = function (input_ensembl_vector) {
+to_add_gene_symbol_ENSEMBL = function (input_ensembl_vector, ensembl_biomart) {
 
-  ensembl <- biomaRt::useEnsembl(biomart = "ensembl", dataset = "hsapiens_gene_ensembl")
+  #ensembl <- biomaRt::useEnsembl(biomart = "ensembl", dataset = "hsapiens_gene_ensembl")
 
-  gene_mapping_df = biomaRt::getBM(mart = ensembl,attributes = c("entrezgene_id","ensembl_gene_id","hgnc_symbol"),
+  gene_mapping_df = biomaRt::getBM(mart = ensembl_biomart,attributes = c("entrezgene_id","ensembl_gene_id","hgnc_symbol"),
                           filters = "ensembl_gene_id",values = input_ensembl_vector)
   return (gene_mapping_df)
 }
@@ -498,19 +486,20 @@ to_add_gene_symbol_ENSEMBL = function (input_ensembl_vector) {
 to_get_GO_kegg_enrichment = function (expressedTarget,expressedGenes,pval_thresh = 0.05,ont = "BP") {
 
 
-  GO <- clusterProfiler::enrichGO(gene = expressedTarget,
+  GO <- clusterProfiler::enrichGO(gene = as.character(expressedTarget),
                  OrgDb='org.Hs.eg.db',
-                 pvalueCutoff= 1,
+                 pvalueCutoff= pval_thresh,
                  ont = ont,
                  keyType= "ENTREZID",
-                 universe=expressedGenes)
+                 universe= as.character(expressedGenes))
+
 
   GO_df= GO@result
   GO_df = GO_df[order(GO_df$p.adjust),]
 
-  kegg <- clusterProfiler::enrichKEGG(gene = expressedTarget,
+  kegg <- clusterProfiler::enrichKEGG(gene = as.character(expressedTarget),
                    organism  = "human",
-                   pvalueCutoff = 0.05,universe = expressedGenes)
+                   pvalueCutoff =pval_thresh,universe = as.character(expressedGenes))
 
   kegg_df =  kegg@result
   kegg_df =  kegg_df[order(kegg_df$p.adjust),]
