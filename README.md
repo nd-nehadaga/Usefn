@@ -14,7 +14,7 @@ You can install the development version of Usefn from [GitHub](https://github.co
 # install.packages("devtools")
 devtools::install_github("nd-nehadaga/Usefn",build_vignettes = TRUE)
 ```
-
+I ask for your patience. It takes few mins to download :) 
 ## Example
 
 Refer the vignette for used example cases. Also the package contain attached example datasets.
