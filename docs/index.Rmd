@@ -1,0 +1,125 @@
+---
+title: "Usefn functions with examples"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Usefn functions with examples}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup , message = FALSE, fig.height= 4,fig.width= 4, dpi = 200}
+library(Usefn)
+library(ggplot2)
+
+
+enhancer1 = c("chr2:1002-1500","chr1:30000-38000","chr4:70000-78252")
+enhancer2 = c("chr2:1100-1200","chr1:37655-38000" ,"chr4:50000-57122")
+
+
+## To find overlap between two vectors of genomic coordinates
+to_get_overlap_bw_gr_from_peakids(input_genomic_coord1 = enhancer1,input_genomic_coord2 = enhancer2,input1_colname = "enhancer1",input2_colname ="enhancer2")
+
+### To get bed format of genomic coordinates
+to_get_bed_df_peaks_from_peak_id_vector(input_peak_id_vector = enhancer1,bed_file = FALSE,out_fn = "")
+
+```
+
+```{r,warning=FALSE, message = FALSE,error=FALSE}
+
+#### Data used: Normalised rld transformed count matrix of enhancer(peaks) in two tissues (synovial, blood) for juvenile arthritis patients
+### Different ways of visualizing the variation present in the data and its explanatory variables
+
+data(count_matrix)
+data(meta_df)
+
+### computing pca 
+pca_list = compute_pca(data_mat = count_matrix,ntop = 1000,meta_df = meta_df)
+
+### PCA loadings and covariates
+pca_df = pca_list$PCA_meta_df
+head(pca_df)
+
+### PCAs and variability explained
+percentVar = pca_list$perc_var
+head(percentVar)
+
+#### Plotting PCA
+ggplot(data = pca_df , aes(x = PC1,y = PC2, color = Tissue, shape =  Batch, size = 3)) + geom_point() +
+    labs(x = paste0("PC1, VarExp:", round(percentVar[1],2)), y = paste0("PC2, VarExp:", round(percentVar[2],2)), title = "Original Data") 
+
+### We can see most of the explained PC1 variation comes from batch effect and not from the tissues therefore removing the batch effect using function from limma 
+cleaned_count_matrix = limma::removeBatchEffect(count_matrix, batch = meta_df$Batch,design =  model.matrix( ~ meta_df$Tissue))
+
+### Computimg pca and plotting using the above batch corrected data
+pca_list.cleaned = compute_pca(data_mat = cleaned_count_matrix,ntop = 1000,meta_df = meta_df)
+pca_df.cleaned  = pca_list.cleaned$PCA_meta_df
+percentVar.cleaned = pca_list.cleaned$perc_var
+
+ggplot(data = pca_df.cleaned  , aes(x = PC1,y = PC2, color = Tissue, shape =  Batch, size = 3)) + geom_point() +
+    labs(x = paste0("PC1, VarExp:", round(percentVar.cleaned[1],2)), y = paste0("PC2, VarExp:", round(percentVar.cleaned[2],2)),title = "Cleaned Data") 
+
+
+###### Another way to get an overview of variation explained by different PCs and covariates is by use of correlogram
+### This functions also show the distribution of counts for different samples
+
+pca.correlogram(count_matrix = count_matrix,ntop = 1000,metadata = meta_df,covs = c("Tissue","Batch"),scale = TRUE,pcCount = 3, logTransform = TRUE)
+
+```
+
+```{r,warning=FALSE, message = FALSE,error=FALSE, fig.height= 3,fig.width= 5, dpi = 200}
+#### Hetmap of count data based clustering of top variable features
+draw_heatmap_top_peaks(data_mat = count_matrix,ntop = 1000,col_select = c("Tissue","Batch"),meta_df = meta_df,rownorm = FALSE)
+
+
+```
+
+```{r,warning=FALSE, message = FALSE,error=FALSE,fig.height= 3,fig.width= 5, dpi = 200}
+
+### Result table of differential gene expression analysis from DESeq2, refer DESCRIPTION to know more about the data
+data(res_df)
+head(res_df,n = 4)
+
+
+### Diagnostic Volcano plot by labelling significant genes with different cols
+volcanoplot(res = res_df,lfcthresh = 3,sigthresh = .0001)
+maplot(res = res_df,thresh = 0.001,labelsig = FALSE)
+
+##### Mapping ENSEMBL ids
+### Modifying the ensembl ids
+res_df$ENSEMBL = sapply(X = rownames(res_df),FUN = modify_string,delimtter = ".",position = 1,USE.NAMES = FALSE)
+head(res_df, n = 4)
+```
+
+```{r enrichment, warning=FALSE, message = FALSE,error=FALSE}
+###### Map ENSEMBL ids to gene symbol
+ensembl <- biomaRt::useEnsembl(biomart = "ensembl", dataset = "hsapiens_gene_ensembl")
+gene_mapping_df = to_add_gene_symbol_ENSEMBL(input_ensembl_vector = res_df$ENSEMBL,ensembl_biomart = ensembl)
+
+
+head(gene_mapping_df)
+
+#### Performing GO and kegg enrichment analysis with significantly differential genes 
+diff_genes = res_df[res_df$padj <= 0.01,"ENSEMBL"]
+diff_genes = diff_genes[!(is.na(diff_genes))]
+diff_genes_entrez = gene_mapping_df[match(diff_genes,gene_mapping_df$ensembl_gene_id),"entrezgene_id"]
+
+
+GO_kegg_df = to_get_GO_kegg_enrichment(expressedTarget = diff_genes_entrez,expressedGenes = unique(gene_mapping_df$entrezgene_id))
+
+GO_df = GO_kegg_df[[1]]
+kegg_df = GO_kegg_df[[2]]
+
+head(GO_df, n= 3)
+head(kegg_df, n = 3)
+
+
+
+
+```
