@@ -5,6 +5,7 @@
 <!-- badges: end -->
 
 This package contains commonly used R functions which I have used for the analysis and visualisation of genomic/transcriptomic data
+Check this for used example case https://nd-nehadaga.github.io/Usefn/  
 
 ## Installation
 
@@ -15,7 +16,8 @@ You can install the development version of Usefn from [GitHub](https://github.co
 devtools::install_github("nd-nehadaga/Usefn",build_vignettes = TRUE)
 ```
 I ask for your patience. It takes few mins to download :) 
-## Example
 
-Refer the vignette for used example cases. Also the package contain attached example datasets.
+## Example
+Refer the vignette for used example cases. Also the package contain attached example datasets to try all the functions. 
+
 
